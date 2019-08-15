@@ -1,4 +1,4 @@
 {
-    "python.pythonPath": "elevator-sim/bin/python",
+    "python.pythonPath": "elevator-sim/bin/python3.7",
     "python.envFile": "${workspaceFolder}/.env"
 }
