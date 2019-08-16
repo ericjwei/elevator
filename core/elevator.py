@@ -2,12 +2,13 @@ import time
 import datetime
 import sched
 import threading
+import queue
 
 from random import randint
 from person import Person
 
 SPEED = .25
-DAY_SECONDS = 5 #86400
+DAY_SECONDS = 86400
 POPULATION = 50
 MAX_FLOOR = 10
 YEAR = 1
@@ -51,29 +52,29 @@ week_day = 1 #start on Monday
 #         person.set_end()
 #         occupants.append(person)    
 
-def new_day(scheduler, populate_building, baseTime):
+def new_day(scheduler, baseTime, demand_queue):
     scheduler.enter(DAY_SECONDS - (time.time() - baseTime), 1,
-                    new_day, (scheduler, populate_building, baseTime + DAY_SECONDS))
+                    new_day, (scheduler, baseTime + DAY_SECONDS, demand_queue))
+    occupants = []
     for _ in range(POPULATION):
         person = Person(randint(2, MAX_FLOOR))
         person.set_begin()
         person.set_end()
         occupants.append(person)  
     occupants.sort(key=lambda x: x.begin)
+    demand_queue.put(occupants)
+    # for p in occupants:
+    #     p.print_info()
     print(baseTime)
     print_time()
 
-def demand_thread():
+def demand_thread(demand_queue):
     #populate_building()
     baseTime = START_TIME
     scheduler = sched.scheduler(time.time, time.sleep)
-    scheduler.enter(DAY_SECONDS - (time.time() - baseTime), 1,
-                    new_day, (scheduler, populate_building, baseTime + DAY_SECONDS))
-    #for p in occupants:
-    #    p.print_info()
-        #scheduler.enter(p.get_begin - time.time(), 1, demand_proc())
+    new_day(scheduler, baseTime, demand_queue)    
     scheduler.run()
-    
+
 def print_time():
     t = time.strftime("%b-%d %H:%M:%S", time.gmtime(time.time() - START_TIME))
     print(f"Year {YEAR} {t}")
@@ -81,9 +82,18 @@ def print_time():
 def main():
     global START_TIME
     START_TIME = time.time()
-    print_time()
-    demand = threading.Thread(target=demand_thread)
+    # print(START_TIME)
+    # print_time()
+    demand_queue = queue.Queue()
+    demand = threading.Thread(target=demand_thread, args=(demand_queue,))
     demand.start()
+
+    while(True):
+        occupants = demand_queue.get()
+        print_time()
+        for p in occupants:
+            p.print_info()
+        
     
     # clock = threading.Thread(target=clock_thread)
     # clock.start()

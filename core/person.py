@@ -41,4 +41,4 @@ class Person:
     return(self.end)
 
   def print_info(self):
-    print(f"Floor: {self.floor} Hours: {strftime('%Y-%m-%d %H:%M:%S', gmtime(self.begin))} - {strftime('%Y-%m-%d %H:%M:%S', gmtime(self.end))}")
+    print(f"Floor: {self.floor:02d} Hours: {strftime('%Y-%m-%d %H:%M:%S', gmtime(self.begin))} - {strftime('%Y-%m-%d %H:%M:%S', gmtime(self.end))}")
