@@ -8,7 +8,7 @@ from random import randint
 from person import Person
 
 SPEED = .25
-RATIO = 60
+RATIO = 300
 DAY_SECONDS = 86400 / RATIO
 POPULATION = 50
 MAX_FLOOR = 10
@@ -22,6 +22,7 @@ def new_day(scheduler, base_time, demand_queue):
         person.set_begin()
         person.set_end()
         scheduler.enterabs(person.begin / RATIO + base_time, 2, demand_queue.put, (person,))
+        scheduler.enterabs(person.end / RATIO + base_time, 2, demand_queue.put, (person,))
 
 def demand_thread(demand_queue, start_time):
     scheduler = sched.scheduler(time.time, time.sleep)

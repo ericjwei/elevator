@@ -46,4 +46,4 @@ class Person:
 
   def print_info(self):
     # t = time.strftime("%b-%d %H:%M:%S", time.gmtime(time.time() - start_time))
-    print(f"Floor: {self.floor:02d} Hours: {strftime('%H:%M:%S', gmtime(self.begin))} - {strftime('%Y-%m-%d %H:%M:%S', gmtime(self.end))}")
+    print(f"Floor: {self.floor:02d} Hours: {strftime('%H:%M:%S', gmtime(self.begin))} - {strftime('%H:%M:%S', gmtime(self.end))}")
