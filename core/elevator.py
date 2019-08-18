@@ -1,5 +1,5 @@
 import time
-import datetime
+# import datetime
 import sched
 import threading
 import queue
@@ -8,105 +8,41 @@ from random import randint
 from person import Person
 
 SPEED = .25
-DAY_SECONDS = 86400
+RATIO = 60
+DAY_SECONDS = 86400 / RATIO
 POPULATION = 50
 MAX_FLOOR = 10
 YEAR = 1
-#BASE_TIME = None
-START_TIME = None
 
-current_time = datetime.datetime(1,1,1)
-week_day = 1 #start on Monday
-
-# occupants = []
-
-# def print_datetime():
-#     print(f"Day: {week_day} {current_time.time()}")
-
-# def add_time():
-#     global current_time
-#     global week_day
-#     if(current_time.time() == time(23,45)):
-#         if(week_day == 7):
-#             week_day = 1
-#         else:
-#             week_day += 1 
-#     current_time = current_time + timedelta(minutes = 15)
-
-# def periodic(scheduler, interval, action, actionargs=()):
-#     scheduler.enter(interval, 1, periodic, 
-#                     (scheduler, interval, action, actionargs))
-#     action(*actionargs)
-#     print_datetime()
-
-# def clock_thread():
-#     scheduler = sched.scheduler(time.time, time.sleep)
-#     time.sleep(SPEED)
-#     periodic(scheduler, SPEED, add_time)
-#     scheduler.run()
-
-# def populate_building():
-#     for _ in range(POPULATION):
-#         person = Person(randint(2, MAX_FLOOR))
-#         person.set_begin()
-#         person.set_end()
-#         occupants.append(person)    
-
-def new_day(scheduler, baseTime, demand_queue):
-    scheduler.enter(DAY_SECONDS - (time.time() - baseTime), 1,
-                    new_day, (scheduler, baseTime + DAY_SECONDS, demand_queue))
-    occupants = []
+def new_day(scheduler, base_time, demand_queue):
+    scheduler.enterabs(DAY_SECONDS + base_time, 1,
+                    new_day, (scheduler, base_time + DAY_SECONDS, demand_queue))
     for _ in range(POPULATION):
         person = Person(randint(2, MAX_FLOOR))
         person.set_begin()
         person.set_end()
-        occupants.append(person)  
-    occupants.sort(key=lambda x: x.begin)
-    demand_queue.put(occupants)
-    # for p in occupants:
-    #     p.print_info()
-    print(baseTime)
-    print_time()
+        scheduler.enterabs(person.begin / RATIO + base_time, 2, demand_queue.put, (person,))
 
-def demand_thread(demand_queue):
-    #populate_building()
-    baseTime = START_TIME
+def demand_thread(demand_queue, start_time):
     scheduler = sched.scheduler(time.time, time.sleep)
-    new_day(scheduler, baseTime, demand_queue)    
+    new_day(scheduler, start_time, demand_queue)    
     scheduler.run()
 
-def print_time():
-    t = time.strftime("%b-%d %H:%M:%S", time.gmtime(time.time() - START_TIME))
+def print_time(start_time):
+    t = time.strftime("%b-%d %H:%M:%S", time.gmtime((time.time() - start_time) * RATIO))
     print(f"Year {YEAR} {t}")
 
 def main():
-    global START_TIME
-    START_TIME = time.time()
-    # print(START_TIME)
-    # print_time()
+    start_time = time.time()
     demand_queue = queue.Queue()
-    demand = threading.Thread(target=demand_thread, args=(demand_queue,))
+    demand = threading.Thread(target=demand_thread, args=(demand_queue, start_time))
     demand.start()
 
     while(True):
-        occupants = demand_queue.get()
-        print_time()
-        for p in occupants:
+        if(not demand_queue.empty()):
+            p = demand_queue.get()
+            print_time(start_time)
             p.print_info()
-        
-    
-    # clock = threading.Thread(target=clock_thread)
-    # clock.start()
-    # while(True):
-    #     if(current_time.time() == datetime.time(7,00)):
-    #         print("Good morning")
-    #         time.sleep(1)
-    #     if(current_time.time() == datetime.time(12,00)):
-    #         print("Good afternoon")
-    #         time.sleep(1)
-    #     if(current_time.time() == datetime.time(18,00)):
-    #         print("Good evening")    
-    #         time.sleep(1)
 
 if __name__ == "__main__":
     main()
