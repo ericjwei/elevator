@@ -1,18 +1,12 @@
 import time
-# import datetime
 import sched
 import threading
 import queue
 
 from random import randint
 from person import Person
-
-SPEED = .25
-RATIO = 300
-DAY_SECONDS = 86400 / RATIO
-POPULATION = 50
-MAX_FLOOR = 10
-YEAR = 1
+from control_system import control_system
+from constants import RATIO, DAY_SECONDS, POPULATION, MAX_FLOOR, YEAR
 
 def new_day(scheduler, base_time, demand_queue):
     scheduler.enterabs(DAY_SECONDS + base_time, 1,
@@ -39,11 +33,7 @@ def main():
     demand = threading.Thread(target=demand_thread, args=(demand_queue, start_time))
     demand.start()
 
-    while(True):
-        if(not demand_queue.empty()):
-            p = demand_queue.get()
-            print_time(start_time)
-            p.print_info()
+    control_system(demand_queue)
 
 if __name__ == "__main__":
     main()
