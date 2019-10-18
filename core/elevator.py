@@ -1,7 +1,6 @@
 import time
 import sched
 import threading
-import queue
 import multiprocessing
 
 #import datetime
@@ -47,7 +46,7 @@ def main():
     # for i in demand_list:
     #     print(i.qsize())
 
-    #control_system(demand_queue)
+    control_system(demand_list)
 
 if __name__ == "__main__":
     main()
