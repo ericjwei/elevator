@@ -7,7 +7,7 @@ from bisect import insort
 ACCELERATION = 1 #1 m/s^2 standard elevator acceleration in the US
 MAX_VELOCITY = 10
 MAX_DISTANCE = (MAX_VELOCITY ** 2) / (2 * ACCELERATION)  #max distance of constant acceleration for max velocity of 10 m/s
-
+ACCELERATION_TIME = sqrt(FLOOR_HEIGHT / ACCELERATION) #time of acceleration
 class ElevatorCar:
   def __init__(self, id, floors, max_capacity = 10, passengers = [], 
       selected_floors = [], current_floor = 1, current_location = 0, current_velocity = 0):
@@ -25,8 +25,22 @@ class ElevatorCar:
   def add_stop(self, floor):
     insort(self.selected_floors, floor)
 
-  def track_location(self, )
+  def track_location(self, depart_time)
     
+    direction = 1 if self.direction else -1
+      
+    while(perf_counter - depart_time < ACCELERATION_TIME):
+      sleep(0.5)
+    self.current_floor = self.current_floor + direction * 0.5
+    depart_time = depart_time + ACCELERATION_TIME
+
+    while()
+
+
+    #every half floor the elevator will update location
+    #floor 0 is lobby, 0.5 is half between lobby and 1st floor
+
+
 
   # Travel to next floor with travel time taken to reach the designated floor
   def travel(self):
